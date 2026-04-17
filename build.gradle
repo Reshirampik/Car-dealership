@@ -3,10 +3,12 @@ plugins {
     id 'idea'
     id "jacoco"
     id 'com.diffplug.spotless' version '6.25.0'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.5'
 }
 
-spotless{
-    java{
+spotless {
+    java {
         googleJavaFormat('1.22.0')
         removeUnusedImports()
         trimTrailingWhitespace()
@@ -28,12 +30,21 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.modelmapper:modelmapper:3.2.6'
+    runtimeOnly 'org.postgresql:postgresql'
     testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
     testImplementation 'org.testcontainers:postgresql:1.19.7'
     testImplementation 'org.postgresql:postgresql:42.7.4'
     testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.13'
+    testRuntimeOnly 'org.postgresql:postgresql'
 }
 
 configurations {
