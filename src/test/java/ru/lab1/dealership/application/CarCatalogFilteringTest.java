@@ -1,11 +1,17 @@
 package ru.lab1.dealership.application;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import ru.lab1.dealership.domain.car.*;
+import ru.lab1.dealership.domain.car.BodyType;
+import ru.lab1.dealership.domain.car.CarInStock;
+import ru.lab1.dealership.domain.car.CarModel;
+import ru.lab1.dealership.domain.car.DriveType;
+import ru.lab1.dealership.domain.car.FuelType;
+import ru.lab1.dealership.domain.car.GearboxType;
 import ru.lab1.dealership.domain.exception.DomainValidationException;
 import ru.lab1.dealership.infrastructure.repository.CarInStockRepository;
 
@@ -24,7 +30,7 @@ class CarCatalogFilteringTest {
             BodyType.SEDAN,
             FuelType.GASOLINE,
             184,
-            2.0,
+            new BigDecimal("2.0"),
             GearboxType.AUTOMATIC,
             DriveType.RWD,
             new BigDecimal("3500000"));
@@ -37,7 +43,7 @@ class CarCatalogFilteringTest {
             BodyType.SEDAN,
             FuelType.GASOLINE,
             190,
-            2.0,
+            new BigDecimal("2.0"),
             GearboxType.AUTOMATIC,
             DriveType.AWD,
             new BigDecimal("3300000"));
@@ -47,13 +53,14 @@ class CarCatalogFilteringTest {
     repo.save(new CarInStock(UUID.randomUUID(), audiModel, "black", new BigDecimal("3400000")));
 
     var filter =
-        new CarFilter(null, null, "BMW", null, null, null, null, null, null, null, "black");
+        new CarFilter(
+            null, null, "BMW", null, null, null, null, null, null, null, null, null, "black");
 
-    var result = service.listAvailable(filter);
+    var result = service.listAvailableCars(filter);
 
     assertEquals(1, result.size());
-    assertEquals("BMW", result.getFirst().getModel().getBrand());
-    assertEquals("black", result.getFirst().getColor());
+    assertEquals("BMW", result.get(0).getModel().getBrand());
+    assertEquals("black", result.get(0).getColor());
   }
 
   @Test
@@ -61,9 +68,11 @@ class CarCatalogFilteringTest {
     var repo = new CarInStockRepository();
     var service = new CarCatalogService(repo);
 
-    var filter = new CarFilter(null, null, null, "320i", null, null, null, null, null, null, null);
+    var filter =
+        new CarFilter(
+            null, null, null, "320i", null, null, null, null, null, null, null, null, null);
 
-    assertThrows(DomainValidationException.class, () -> service.listAvailable(filter));
+    assertThrows(DomainValidationException.class, () -> service.listAvailableCars(filter));
   }
 
   @Test
@@ -104,8 +113,8 @@ class CarCatalogFilteringTest {
             null,
             null);
 
-    var result = service.listAvailable(filter);
+    var result = service.listAvailableCars(filter);
     assertEquals(1, result.size());
-    assertEquals(new BigDecimal("3600000"), result.getFirst().getPrice());
+    assertEquals(new BigDecimal("3600000"), result.get(0).getPrice());
   }
 }
