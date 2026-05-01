@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: dealership-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dealership
+      POSTGRES_USER: dealership
+      POSTGRES_PASSWORD: dealership
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dealership -d dealership"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
