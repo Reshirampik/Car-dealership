@@ -3,6 +3,7 @@ package ru.lab1.dealership.web.controller;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,7 @@ import ru.lab1.dealership.web.dto.CarInStockResponse;
 
 @RestController
 @RequestMapping("/api/cars")
+@PreAuthorize("isAuthenticated()")
 public class CarInStockController {
   private final CarInStockService carInStockService;
 
@@ -36,17 +38,20 @@ public class CarInStockController {
   }
 
   @PostMapping
+  @PreAuthorize("hasAnyRole('WAREHOUSE_ADMIN','ADMIN')")
   @ResponseStatus(HttpStatus.CREATED)
   public CarInStockResponse create(@RequestBody CarInStockRequest request) {
     return carInStockService.create(request);
   }
 
   @PutMapping("/{id}")
+  @PreAuthorize("hasAnyRole('WAREHOUSE_ADMIN','ADMIN')")
   public CarInStockResponse update(@PathVariable UUID id, @RequestBody CarInStockRequest request) {
     return carInStockService.update(id, request);
   }
 
   @DeleteMapping("/{id}")
+  @PreAuthorize("hasAnyRole('WAREHOUSE_ADMIN','ADMIN')")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable UUID id) {
     carInStockService.delete(id);

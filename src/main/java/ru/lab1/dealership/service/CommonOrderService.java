@@ -22,38 +22,47 @@ public class CommonOrderService {
   private final CommonOrderRepository commonOrderRepository;
   private final UserRepository userRepository;
   private final CarInStockRepository carInStockRepository;
+  private final CurrentUserService currentUserService;
 
   public CommonOrderService(
       CommonOrderRepository commonOrderRepository,
       UserRepository userRepository,
-      CarInStockRepository carInStockRepository) {
+      CarInStockRepository carInStockRepository,
+      CurrentUserService currentUserService) {
     this.commonOrderRepository = commonOrderRepository;
     this.userRepository = userRepository;
     this.carInStockRepository = carInStockRepository;
+    this.currentUserService = currentUserService;
   }
 
   @Transactional(readOnly = true)
   public List<OrderResponse> list() {
+    if (!currentUserService.hasAuthentication()) {
+      return commonOrderRepository.findAllByRemovedFalse().stream().map(this::toResponse).toList();
+    }
+    UserEntity currentUser = currentUserService.currentUser();
+    if (isClient(currentUser)) {
+      return commonOrderRepository.findAllByRemovedFalseAndClient_Id(currentUser.getId()).stream()
+          .map(this::toResponse)
+          .toList();
+    }
     return commonOrderRepository.findAllByRemovedFalse().stream().map(this::toResponse).toList();
   }
 
   @Transactional(readOnly = true)
   public OrderResponse get(UUID id) {
-    return toResponse(
-        commonOrderRepository
-            .findByIdAndRemovedFalse(id)
-            .orElseThrow(EntityLookupSupport.notFound("Common order", id)));
+    if (!currentUserService.hasAuthentication()) {
+      return toResponse(require(id));
+    }
+    return toResponse(requireVisible(id));
   }
 
   public OrderResponse create(CreateCommonOrderRequest request) {
-    if (request == null || request.clientId() == null || request.carId() == null) {
+    if (request == null || request.carId() == null) {
       throw new DomainValidationException("Invalid common order request.");
     }
-    UserEntity client =
-        userRepository
-            .findByIdAndRemovedFalse(request.clientId())
-            .orElseThrow(EntityLookupSupport.notFound("User", request.clientId()));
-    if (client.getRole() != UserRole.CLIENT) {
+    UserEntity client = resolveClient(request.clientId());
+    if (!isClient(client) && !isAdmin(client)) {
       throw new DomainValidationException("Only client can create a common order.");
     }
     CarInStockEntity car =
@@ -105,7 +114,7 @@ public class CommonOrderService {
   }
 
   public OrderResponse cancel(UUID id) {
-    CommonOrderEntity entity = require(id);
+    CommonOrderEntity entity = requireVisible(id);
     entity.cancel();
     return toResponse(commonOrderRepository.save(entity));
   }
@@ -120,6 +129,39 @@ public class CommonOrderService {
     return commonOrderRepository
         .findByIdAndRemovedFalse(id)
         .orElseThrow(EntityLookupSupport.notFound("Common order", id));
+  }
+
+  private CommonOrderEntity requireVisible(UUID id) {
+    UserEntity currentUser = currentUserService.currentUser();
+    if (isClient(currentUser)) {
+      return commonOrderRepository
+          .findByIdAndRemovedFalseAndClient_Id(id, currentUser.getId())
+          .orElseThrow(EntityLookupSupport.notFound("Common order", id));
+    }
+    return require(id);
+  }
+
+  private UserEntity resolveClient(UUID requestedClientId) {
+    if (currentUserService.hasAuthentication()) {
+      UserEntity currentUser = currentUserService.currentUser();
+      if (isClient(currentUser) || isAdmin(currentUser)) {
+        return currentUser;
+      }
+    }
+    if (requestedClientId != null) {
+      return userRepository
+          .findByIdAndRemovedFalse(requestedClientId)
+          .orElseThrow(EntityLookupSupport.notFound("User", requestedClientId));
+    }
+    return currentUserService.currentUser();
+  }
+
+  private boolean isClient(UserEntity user) {
+    return user.getRole() == UserRole.CLIENT;
+  }
+
+  private boolean isAdmin(UserEntity user) {
+    return user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.SYSTEM_ADMIN;
   }
 
   private OrderResponse toResponse(CommonOrderEntity entity) {

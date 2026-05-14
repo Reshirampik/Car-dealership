@@ -1,5 +1,6 @@
 package ru.lab1.dealership.web.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +11,7 @@ import ru.lab1.dealership.web.dto.ConfigurationResponse;
 
 @RestController
 @RequestMapping("/api/configurations")
+@PreAuthorize("isAuthenticated()")
 public class ConfigurationController {
   private final ConfigurationService configurationService;
 

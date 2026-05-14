@@ -4,5 +4,6 @@ public enum UserRole {
   CLIENT,
   MANAGER,
   WAREHOUSE_ADMIN,
+  ADMIN,
   SYSTEM_ADMIN
 }
