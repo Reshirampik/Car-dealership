@@ -2,6 +2,7 @@ package ru.lab1.dealership.web.controller;
 
 import java.util.List;
 import java.util.UUID;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,11 +27,6 @@ public class CarModelController {
     this.carModelService = carModelService;
   }
 
-  @GetMapping
-  public List<CarModelResponse> list(CarModelFilterRequest filter) {
-    return carModelService.list(filter);
-  }
-
   @GetMapping("/{id}")
   public CarModelResponse get(@PathVariable UUID id) {
     return carModelService.get(id);
@@ -51,5 +47,10 @@ public class CarModelController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable UUID id) {
     carModelService.delete(id);
+  }
+
+  @GetMapping
+  public List<CarModelResponse> list(@ParameterObject CarModelFilterRequest filter) {
+    return carModelService.list(filter);
   }
 }

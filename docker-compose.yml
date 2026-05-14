@@ -17,5 +17,21 @@ services:
       timeout: 5s
       retries: 10
 
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: dealership-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dealership
+      SPRING_DATASOURCE_USERNAME: dealership
+      SPRING_DATASOURCE_PASSWORD: dealership
+    ports:
+      - "8080:8080"
+
 volumes:
   postgres_data:
