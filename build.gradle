@@ -1,12 +1,14 @@
 plugins {
     id 'java'
     id 'idea'
-    id "jacoco"
+    id 'jacoco'
     id 'com.diffplug.spotless' version '6.25.0'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.5'
 }
 
-spotless{
-    java{
+spotless {
+    java {
         googleJavaFormat('1.22.0')
         removeUnusedImports()
         trimTrailingWhitespace()
@@ -28,11 +30,21 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.modelmapper:modelmapper:3.2.6'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+    runtimeOnly 'org.postgresql:postgresql'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
-    testImplementation 'org.testcontainers:postgresql:1.19.7'
-    testImplementation 'org.postgresql:postgresql:42.7.4'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.h2database:h2'
+
+    testImplementation platform('org.testcontainers:testcontainers-bom:1.19.7')
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
     testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.13'
 }
 
@@ -73,6 +85,10 @@ tasks.named('processIntegrationTestResources') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+tasks.named('check') {
+    dependsOn tasks.named('integrationTest')
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
@@ -84,10 +100,6 @@ jacoco {
 tasks.named('test') {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
-}
-
-test {
-    useJUnitPlatform()
     testLogging {
         events 'passed', 'skipped', 'failed'
     }

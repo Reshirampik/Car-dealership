@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/dealership}
+    username: ${SPRING_DATASOURCE_USERNAME:dealership}
+    password: ${SPRING_DATASOURCE_PASSWORD:dealership}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

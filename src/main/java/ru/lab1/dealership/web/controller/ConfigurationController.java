@@ -1,0 +1,24 @@
+package ru.lab1.dealership.web.controller;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import ru.lab1.dealership.service.ConfigurationService;
+import ru.lab1.dealership.web.dto.ConfigurationRequest;
+import ru.lab1.dealership.web.dto.ConfigurationResponse;
+
+@RestController
+@RequestMapping("/api/configurations")
+public class ConfigurationController {
+  private final ConfigurationService configurationService;
+
+  public ConfigurationController(ConfigurationService configurationService) {
+    this.configurationService = configurationService;
+  }
+
+  @PostMapping("/calculate")
+  public ConfigurationResponse calculate(@RequestBody ConfigurationRequest request) {
+    return configurationService.calculate(request);
+  }
+}
