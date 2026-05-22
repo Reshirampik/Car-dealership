@@ -3,6 +3,7 @@ package ru.lab1.dealership.service;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.lab1.dealership.domain.exception.DomainValidationException;
@@ -16,6 +17,7 @@ import ru.lab1.dealership.persistence.repository.UserRepository;
 import ru.lab1.dealership.web.dto.TestDriveRequestDto;
 import ru.lab1.dealership.web.dto.TestDriveResponse;
 
+@Profile("order-service")
 @Service
 @Transactional
 public class TestDriveService {

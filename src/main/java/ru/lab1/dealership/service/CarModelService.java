@@ -3,6 +3,7 @@ package ru.lab1.dealership.service;
 import java.util.List;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import ru.lab1.dealership.web.dto.CarModelFilterRequest;
 import ru.lab1.dealership.web.dto.CarModelRequest;
 import ru.lab1.dealership.web.dto.CarModelResponse;
 
+@Profile("storage-service")
 @Service
 @Transactional
 public class CarModelService {

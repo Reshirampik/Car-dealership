@@ -1,12 +1,17 @@
 package ru.lab1.dealership.service;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.lab1.dealership.domain.exception.DomainValidationException;
 import ru.lab1.dealership.domain.order.CommonOrderStatus;
 import ru.lab1.dealership.domain.user.UserRole;
+import ru.lab1.dealership.messaging.event.OrderSentForApprovalEvent;
+import ru.lab1.dealership.messaging.event.OrderType;
 import ru.lab1.dealership.persistence.entity.CarInStockEntity;
 import ru.lab1.dealership.persistence.entity.CommonOrderEntity;
 import ru.lab1.dealership.persistence.entity.UserEntity;
@@ -16,6 +21,7 @@ import ru.lab1.dealership.persistence.repository.UserRepository;
 import ru.lab1.dealership.web.dto.CreateCommonOrderRequest;
 import ru.lab1.dealership.web.dto.OrderResponse;
 
+@Profile("order-service")
 @Service
 @Transactional
 public class CommonOrderService {
@@ -23,16 +29,19 @@ public class CommonOrderService {
   private final UserRepository userRepository;
   private final CarInStockRepository carInStockRepository;
   private final CurrentUserService currentUserService;
+  private final OutboxService outboxService;
 
   public CommonOrderService(
       CommonOrderRepository commonOrderRepository,
       UserRepository userRepository,
       CarInStockRepository carInStockRepository,
-      CurrentUserService currentUserService) {
+      CurrentUserService currentUserService,
+      OutboxService outboxService) {
     this.commonOrderRepository = commonOrderRepository;
     this.userRepository = userRepository;
     this.carInStockRepository = carInStockRepository;
     this.currentUserService = currentUserService;
+    this.outboxService = outboxService;
   }
 
   @Transactional(readOnly = true)
@@ -98,7 +107,19 @@ public class CommonOrderService {
   public OrderResponse markPaid(UUID id) {
     CommonOrderEntity entity = require(id);
     entity.markPaid();
-    return toResponse(commonOrderRepository.save(entity));
+    CommonOrderEntity saved = commonOrderRepository.save(entity);
+    outboxService.enqueueOrderSentForApproval(
+        new OrderSentForApprovalEvent(
+            UUID.randomUUID(),
+            saved.getId(),
+            OrderType.COMMON,
+            saved.getClient().getId(),
+            saved.getCar().getId(),
+            null,
+            Set.of(),
+            outboxService.defaultTraceId(),
+            Instant.now()));
+    return toResponse(saved);
   }
 
   public OrderResponse readyForPickup(UUID id) {

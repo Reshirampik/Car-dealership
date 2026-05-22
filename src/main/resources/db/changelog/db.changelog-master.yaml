@@ -3,3 +3,5 @@ databaseChangeLog:
       file: db/changelog/001-create-schema.yaml
   - include:
       file: db/changelog/002-seed-data.yaml
+  - include:
+      file: db/changelog/003-lab4-extra.yaml

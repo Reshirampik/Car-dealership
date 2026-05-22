@@ -2,6 +2,7 @@ package ru.lab1.dealership.service;
 
 import java.util.Collection;
 import java.util.Optional;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +14,7 @@ import ru.lab1.dealership.domain.user.UserRole;
 import ru.lab1.dealership.persistence.entity.UserEntity;
 import ru.lab1.dealership.persistence.repository.UserRepository;
 
+@Profile("order-service")
 @Service
 @Transactional
 public class CurrentUserService {

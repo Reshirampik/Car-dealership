@@ -3,6 +3,7 @@ package ru.lab1.dealership.web.controller;
 import java.util.List;
 import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +20,7 @@ import ru.lab1.dealership.web.dto.CarModelFilterRequest;
 import ru.lab1.dealership.web.dto.CarModelRequest;
 import ru.lab1.dealership.web.dto.CarModelResponse;
 
+@Profile("storage-service")
 @RestController
 @RequestMapping("/api/car-models")
 @PreAuthorize("isAuthenticated()")

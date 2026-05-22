@@ -2,6 +2,7 @@ package ru.lab1.dealership.web.controller;
 
 import java.util.List;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +17,7 @@ import ru.lab1.dealership.service.CustomOrderService;
 import ru.lab1.dealership.web.dto.CreateCustomOrderRequest;
 import ru.lab1.dealership.web.dto.CustomOrderResponse;
 
+@Profile("order-service")
 @RestController
 @RequestMapping("/api/custom-orders")
 @PreAuthorize("isAuthenticated()")

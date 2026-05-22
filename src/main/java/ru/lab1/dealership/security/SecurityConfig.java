@@ -18,6 +18,7 @@ import ru.lab1.dealership.web.dto.ErrorResponse;
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper)
       throws Exception {
@@ -33,6 +34,14 @@ public class SecurityConfig {
                         "/v3/api-docs.yaml",
                         "/actuator/health")
                     .permitAll()
+                    .requestMatchers(
+                        "/api/assembly-orders/**",
+                        "/api/cars/**",
+                        "/api/car-models/**",
+                        "/api/component-options/**",
+                        "/api/configurations/**",
+                        "/api/spare-parts/**")
+                    .hasAnyRole("WAREHOUSE_ADMIN", "ADMIN")
                     .anyRequest()
                     .authenticated())
         .oauth2ResourceServer(

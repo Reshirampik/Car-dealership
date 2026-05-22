@@ -2,6 +2,7 @@ package ru.lab1.dealership.web.controller;
 
 import java.util.List;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +18,7 @@ import ru.lab1.dealership.service.SparePartService;
 import ru.lab1.dealership.web.dto.SparePartRequest;
 import ru.lab1.dealership.web.dto.SparePartResponse;
 
+@Profile("storage-service")
 @RestController
 @RequestMapping("/api/spare-parts")
 @PreAuthorize("isAuthenticated()")
