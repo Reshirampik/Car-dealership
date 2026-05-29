@@ -1,11 +1,13 @@
 package ru.lab1.dealership.service;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.lab1.dealership.domain.config.ComponentType;
@@ -13,6 +15,8 @@ import ru.lab1.dealership.domain.exception.DomainValidationException;
 import ru.lab1.dealership.domain.exception.IncompatibleComponentException;
 import ru.lab1.dealership.domain.order.CustomOrderStatus;
 import ru.lab1.dealership.domain.user.UserRole;
+import ru.lab1.dealership.messaging.event.OrderSentForApprovalEvent;
+import ru.lab1.dealership.messaging.event.OrderType;
 import ru.lab1.dealership.persistence.entity.CarModelEntity;
 import ru.lab1.dealership.persistence.entity.ComponentOptionEntity;
 import ru.lab1.dealership.persistence.entity.CustomOrderEntity;
@@ -26,6 +30,7 @@ import ru.lab1.dealership.web.dto.ConfigurationSelectionResponse;
 import ru.lab1.dealership.web.dto.CreateCustomOrderRequest;
 import ru.lab1.dealership.web.dto.CustomOrderResponse;
 
+@Profile("order-service")
 @Service
 @Transactional
 public class CustomOrderService {
@@ -33,16 +38,19 @@ public class CustomOrderService {
   private final UserRepository userRepository;
   private final CarModelRepository carModelRepository;
   private final ComponentOptionRepository componentOptionRepository;
+  private final OutboxService outboxService;
 
   public CustomOrderService(
       CustomOrderRepository customOrderRepository,
       UserRepository userRepository,
       CarModelRepository carModelRepository,
-      ComponentOptionRepository componentOptionRepository) {
+      ComponentOptionRepository componentOptionRepository,
+      OutboxService outboxService) {
     this.customOrderRepository = customOrderRepository;
     this.userRepository = userRepository;
     this.carModelRepository = carModelRepository;
     this.componentOptionRepository = componentOptionRepository;
+    this.outboxService = outboxService;
   }
 
   @Transactional(readOnly = true)
@@ -113,7 +121,21 @@ public class CustomOrderService {
   public CustomOrderResponse markPaid(UUID id) {
     CustomOrderEntity entity = require(id);
     entity.markPaid();
-    return toResponse(customOrderRepository.save(entity));
+    CustomOrderEntity saved = customOrderRepository.save(entity);
+    outboxService.enqueueOrderSentForApproval(
+        new OrderSentForApprovalEvent(
+            UUID.randomUUID(),
+            saved.getId(),
+            OrderType.CUSTOM,
+            saved.getClient().getId(),
+            null,
+            saved.getModel().getId(),
+            saved.getSelectedOptions().stream()
+                .map(ComponentOptionEntity::getId)
+                .collect(java.util.stream.Collectors.toSet()),
+            outboxService.defaultTraceId(),
+            Instant.now()));
+    return toResponse(saved);
   }
 
   public CustomOrderResponse waitDelivery(UUID id) {

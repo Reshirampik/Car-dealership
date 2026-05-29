@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.lab1.dealership.domain.exception.DomainValidationException;
@@ -15,6 +16,7 @@ import ru.lab1.dealership.persistence.repository.SparePartRepository;
 import ru.lab1.dealership.web.dto.SparePartRequest;
 import ru.lab1.dealership.web.dto.SparePartResponse;
 
+@Profile("storage-service")
 @Service
 @Transactional
 public class SparePartService {

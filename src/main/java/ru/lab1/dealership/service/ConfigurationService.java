@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.lab1.dealership.domain.config.ComponentType;
@@ -20,6 +21,7 @@ import ru.lab1.dealership.web.dto.ConfigurationRequest;
 import ru.lab1.dealership.web.dto.ConfigurationResponse;
 import ru.lab1.dealership.web.dto.ConfigurationSelectionResponse;
 
+@Profile("storage-service")
 @Service
 @Transactional
 public class ConfigurationService {

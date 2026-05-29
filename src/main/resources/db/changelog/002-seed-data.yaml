@@ -1,7 +1,6 @@
 databaseChangeLog:
   - changeSet:
       id: 002-add-keycloak-id-column
-      author: openai
       changes:
         - addColumn:
             tableName: users

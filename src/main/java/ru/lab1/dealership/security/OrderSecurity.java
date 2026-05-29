@@ -1,6 +1,7 @@
 package ru.lab1.dealership.security;
 
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import ru.lab1.dealership.persistence.repository.CommonOrderRepository;
 import ru.lab1.dealership.persistence.repository.CustomOrderRepository;
 import ru.lab1.dealership.service.CurrentUserService;
 
+@Profile("order-service")
 @Component("orderSecurity")
 public class OrderSecurity {
   private final CurrentUserService currentUserService;

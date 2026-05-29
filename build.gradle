@@ -35,6 +35,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
     implementation 'org.modelmapper:modelmapper:3.2.6'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
@@ -47,7 +48,7 @@ dependencies {
     testImplementation platform('org.testcontainers:testcontainers-bom:1.19.7')
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
-    testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.13'
+    testImplementation 'org.testcontainers:rabbitmq'
 }
 
 configurations {

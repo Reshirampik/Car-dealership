@@ -1,7 +1,6 @@
 databaseChangeLog:
   - changeSet:
       id: 001-create-users
-      author: openai
       changes:
         - createTable:
             tableName: users

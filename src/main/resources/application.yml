@@ -1,14 +1,8 @@
 spring:
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/dealership}
-    username: ${SPRING_DATASOURCE_USERNAME:dealership}
-    password: ${SPRING_DATASOURCE_PASSWORD:dealership}
-    driver-class-name: org.postgresql.Driver
-
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
-    open-in-view: false
     properties:
       hibernate:
         jdbc:
@@ -24,6 +18,29 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%X{traceId:-}] %logger{36} - %msg%n"
+
+app:
+  rabbitmq:
+    exchange: ${APP_RABBITMQ_EXCHANGE:dealership.exchange}
+    order-sent-routing-key: ${APP_RABBITMQ_ORDER_SENT_ROUTING_KEY:order.sent-for-approval}
+    order-approved-routing-key: ${APP_RABBITMQ_ORDER_APPROVED_ROUTING_KEY:order.approved}
+    order-rejected-routing-key: ${APP_RABBITMQ_ORDER_REJECTED_ROUTING_KEY:order.rejected}
+    queues:
+      order-sent: ${APP_RABBITMQ_QUEUE_ORDER_SENT:dealership.order.sent}
+      order-approved: ${APP_RABBITMQ_QUEUE_ORDER_APPROVED:dealership.order.approved}
+      order-rejected: ${APP_RABBITMQ_QUEUE_ORDER_REJECTED:dealership.order.rejected}
+  outbox:
+    publish-interval-ms: ${APP_OUTBOX_PUBLISH_INTERVAL_MS:5000}
