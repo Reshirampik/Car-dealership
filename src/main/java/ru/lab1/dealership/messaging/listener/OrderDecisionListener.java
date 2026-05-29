@@ -16,10 +16,12 @@ import ru.lab1.dealership.persistence.repository.ProcessedMessageRepository;
 import ru.lab1.dealership.service.CommonOrderService;
 import ru.lab1.dealership.service.CustomOrderService;
 
-@Profile({"order-service", "!test"})
 @Component
+@Profile("order-service & !test")
 public class OrderDecisionListener {
+
   private static final Logger log = LoggerFactory.getLogger(OrderDecisionListener.class);
+
   private static final String CONSUMER_NAME = "order-decision-listener";
 
   private final CommonOrderService commonOrderService;
@@ -30,10 +32,12 @@ public class OrderDecisionListener {
       CommonOrderService commonOrderService,
       CustomOrderService customOrderService,
       ProcessedMessageRepository processedMessageRepository) {
-    this.commonOrderService = Objects.requireNonNull(commonOrderService, "commonOrderService");
-    this.customOrderService = Objects.requireNonNull(customOrderService, "customOrderService");
-    this.processedMessageRepository =
-        Objects.requireNonNull(processedMessageRepository, "processedMessageRepository");
+
+    this.commonOrderService = Objects.requireNonNull(commonOrderService);
+
+    this.customOrderService = Objects.requireNonNull(customOrderService);
+
+    this.processedMessageRepository = Objects.requireNonNull(processedMessageRepository);
   }
 
   @RabbitListener(queues = "${app.rabbitmq.queues.order-approved}")
@@ -53,6 +57,7 @@ public class OrderDecisionListener {
   }
 
   private void handle(OrderDecisionEvent event) {
+
     withTrace(
         event.traceId(),
         () -> {
@@ -61,16 +66,20 @@ public class OrderDecisionListener {
                 "Skipping duplicated order-decision event eventId={} orderId={}",
                 event.eventId(),
                 event.orderId());
+
             return;
           }
 
           if (event.orderType() == OrderType.COMMON) {
+
             if (event.approved()) {
               commonOrderService.readyForPickup(event.orderId());
             } else {
               commonOrderService.cancel(event.orderId());
             }
+
           } else {
+
             if (event.approved()) {
               customOrderService.waitDelivery(event.orderId());
               customOrderService.readyForPickup(event.orderId());
@@ -90,24 +99,34 @@ public class OrderDecisionListener {
   }
 
   private boolean isProcessed(OrderDecisionEvent event) {
+
     return processedMessageRepository
         .findByConsumerNameAndMessageIdAndRemovedFalse(CONSUMER_NAME, event.eventId())
         .isPresent();
   }
 
   private void markProcessed(OrderDecisionEvent event) {
+
     ProcessedMessageEntity processed = new ProcessedMessageEntity();
+
     processed.setConsumerName(CONSUMER_NAME);
     processed.setMessageId(event.eventId());
+
     processedMessageRepository.save(processed);
   }
 
   private void withTrace(String traceId, Runnable action) {
+
     String previous = MDC.get(TraceContext.TRACE_ID_KEY);
+
     try {
+
       MDC.put(TraceContext.TRACE_ID_KEY, TraceContext.normalize(traceId));
+
       action.run();
+
     } finally {
+
       if (previous == null || previous.isBlank()) {
         MDC.remove(TraceContext.TRACE_ID_KEY);
       } else {

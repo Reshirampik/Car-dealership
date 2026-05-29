@@ -32,6 +32,15 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%X{traceId:-}] %logger{36} - %msg%n"
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+
 app:
   rabbitmq:
     exchange: ${APP_RABBITMQ_EXCHANGE:dealership.exchange}
@@ -44,3 +53,10 @@ app:
       order-rejected: ${APP_RABBITMQ_QUEUE_ORDER_REJECTED:dealership.order.rejected}
   outbox:
     publish-interval-ms: ${APP_OUTBOX_PUBLISH_INTERVAL_MS:5000}
+  grpc:
+    storage-target: ${APP_GRPC_STORAGE_TARGET:localhost:9090}
+    timeout-ms: ${APP_GRPC_TIMEOUT_MS:2000}
+
+grpc:
+  server:
+    port: ${GRPC_SERVER_PORT:9090}

@@ -79,8 +79,10 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/dealership
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
+      APP_GRPC_STORAGE_TARGET: storage-service:9090
+      APP_GRPC_TIMEOUT_MS: 2000
     ports:
       - "8080:8080"
 
@@ -100,16 +102,18 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: storage-service
       SERVER_PORT: 8082
+      GRPC_SERVER_PORT: 9090
       SPRING_DATASOURCE_URL: jdbc:postgresql://storage-db:5432/dealership_storage
       SPRING_DATASOURCE_USERNAME: dealership
       SPRING_DATASOURCE_PASSWORD: dealership
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/dealership
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
     ports:
       - "8082:8082"
+      - "9090:9090"
 
 volumes:
   order_postgres_data:
