@@ -46,7 +46,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.6.1
     container_name: dealership-keycloak
-    command: ["start-dev", "--import-realm"]
+    command: [ "start-dev", "--import-realm" ]
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
@@ -76,11 +76,11 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://order-db:5432/dealership_order
       SPRING_DATASOURCE_USERNAME: dealership
       SPRING_DATASOURCE_PASSWORD: dealership
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/dealership
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://192.168.56.1:8081/realms/dealership
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: admin
-      SPRING_RABBITMQ_PASSWORD: admin
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
       APP_GRPC_STORAGE_TARGET: storage-service:9090
       APP_GRPC_TIMEOUT_MS: 2000
     ports:
@@ -106,11 +106,11 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://storage-db:5432/dealership_storage
       SPRING_DATASOURCE_USERNAME: dealership
       SPRING_DATASOURCE_PASSWORD: dealership
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/dealership
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://host.docker.internal:8081/realms/dealership
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: admin
-      SPRING_RABBITMQ_PASSWORD: admin
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
     ports:
       - "8082:8082"
       - "9090:9090"
