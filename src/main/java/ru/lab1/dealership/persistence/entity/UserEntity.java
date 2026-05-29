@@ -10,6 +10,9 @@ import ru.lab1.dealership.domain.user.UserRole;
 @Entity
 @Table(name = "users")
 public class UserEntity extends BaseEntity {
+  @Column(name = "keycloak_id")
+  private String keycloakId;
+
   @Column(name = "full_name", nullable = false)
   private String fullName;
 
@@ -22,6 +25,20 @@ public class UserEntity extends BaseEntity {
   public UserEntity(String fullName, UserRole role) {
     this.fullName = fullName;
     this.role = role;
+  }
+
+  public UserEntity(String keycloakId, String fullName, UserRole role) {
+    this.keycloakId = keycloakId;
+    this.fullName = fullName;
+    this.role = role;
+  }
+
+  public String getKeycloakId() {
+    return keycloakId;
+  }
+
+  public void setKeycloakId(String keycloakId) {
+    this.keycloakId = keycloakId;
   }
 
   public String getFullName() {

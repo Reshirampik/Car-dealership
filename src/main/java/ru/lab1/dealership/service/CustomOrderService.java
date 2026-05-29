@@ -66,6 +66,7 @@ public class CustomOrderService {
         || request.selections().isEmpty()) {
       throw new DomainValidationException("Invalid custom order request.");
     }
+
     UserEntity client =
         userRepository
             .findByIdAndRemovedFalse(request.clientId())
@@ -73,10 +74,12 @@ public class CustomOrderService {
     if (client.getRole() != UserRole.CLIENT) {
       throw new DomainValidationException("Only client can create a custom order.");
     }
+
     CarModelEntity model =
         carModelRepository
             .findByIdAndRemovedFalse(request.modelId())
             .orElseThrow(EntityLookupSupport.notFound("Car model", request.modelId()));
+
     UserEntity manager =
         userRepository.findAllByRemovedFalse().stream()
             .filter(user -> user.getRole() == UserRole.MANAGER)
@@ -84,6 +87,7 @@ public class CustomOrderService {
             .orElseThrow(() -> new DomainValidationException("No manager available."));
 
     Set<ComponentOptionEntity> selectedOptions = resolveSelections(model, request.selections());
+
     CustomOrderEntity entity = new CustomOrderEntity();
     entity.setClient(client);
     entity.setManager(manager);

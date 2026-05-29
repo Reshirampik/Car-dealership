@@ -2,7 +2,6 @@ package ru.lab1.dealership.service;
 
 import java.util.List;
 import java.util.UUID;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.lab1.dealership.domain.exception.DomainValidationException;
@@ -15,11 +14,9 @@ import ru.lab1.dealership.web.dto.UserResponse;
 @Transactional
 public class UserService {
   private final UserRepository userRepository;
-  private final ModelMapper modelMapper;
 
-  public UserService(UserRepository userRepository, ModelMapper modelMapper) {
+  public UserService(UserRepository userRepository) {
     this.userRepository = userRepository;
-    this.modelMapper = modelMapper;
   }
 
   @Transactional(readOnly = true)
@@ -37,7 +34,7 @@ public class UserService {
 
   public UserResponse create(UserRequest request) {
     validateRequest(request);
-    UserEntity entity = new UserEntity(request.fullName(), request.role());
+    UserEntity entity = new UserEntity(request.keycloakId(), request.fullName(), request.role());
     return toResponse(userRepository.save(entity));
   }
 
@@ -47,6 +44,7 @@ public class UserService {
         userRepository
             .findByIdAndRemovedFalse(id)
             .orElseThrow(EntityLookupSupport.notFound("User", id));
+    entity.setKeycloakId(request.keycloakId());
     entity.setFullName(request.fullName());
     entity.setRole(request.role());
     return toResponse(userRepository.save(entity));
@@ -73,6 +71,7 @@ public class UserService {
   private UserResponse toResponse(UserEntity entity) {
     return new UserResponse(
         entity.getId(),
+        entity.getKeycloakId(),
         entity.getFullName(),
         entity.getRole(),
         entity.getCreatedAt(),

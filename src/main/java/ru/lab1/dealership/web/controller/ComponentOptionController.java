@@ -3,6 +3,7 @@ package ru.lab1.dealership.web.controller;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,7 @@ import ru.lab1.dealership.web.dto.ComponentOptionResponse;
 
 @RestController
 @RequestMapping("/api/component-options")
+@PreAuthorize("isAuthenticated()")
 public class ComponentOptionController {
   private final ComponentOptionService componentOptionService;
 
@@ -36,18 +38,21 @@ public class ComponentOptionController {
   }
 
   @PostMapping
+  @PreAuthorize("hasAnyRole('WAREHOUSE_ADMIN','ADMIN')")
   @ResponseStatus(HttpStatus.CREATED)
   public ComponentOptionResponse create(@RequestBody ComponentOptionRequest request) {
     return componentOptionService.create(request);
   }
 
   @PutMapping("/{id}")
+  @PreAuthorize("hasAnyRole('WAREHOUSE_ADMIN','ADMIN')")
   public ComponentOptionResponse update(
       @PathVariable UUID id, @RequestBody ComponentOptionRequest request) {
     return componentOptionService.update(id, request);
   }
 
   @DeleteMapping("/{id}")
+  @PreAuthorize("hasAnyRole('WAREHOUSE_ADMIN','ADMIN')")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable UUID id) {
     componentOptionService.delete(id);

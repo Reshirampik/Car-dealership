@@ -22,38 +22,50 @@ public class TestDriveService {
   private final TestDriveRequestRepository testDriveRequestRepository;
   private final UserRepository userRepository;
   private final CarInStockRepository carInStockRepository;
+  private final CurrentUserService currentUserService;
 
   public TestDriveService(
       TestDriveRequestRepository testDriveRequestRepository,
       UserRepository userRepository,
-      CarInStockRepository carInStockRepository) {
+      CarInStockRepository carInStockRepository,
+      CurrentUserService currentUserService) {
     this.testDriveRequestRepository = testDriveRequestRepository;
     this.userRepository = userRepository;
     this.carInStockRepository = carInStockRepository;
+    this.currentUserService = currentUserService;
   }
 
   @Transactional(readOnly = true)
   public List<TestDriveResponse> list() {
+    if (!currentUserService.hasAuthentication()) {
+      return testDriveRequestRepository.findAllByRemovedFalse().stream()
+          .map(this::toResponse)
+          .toList();
+    }
+    UserEntity currentUser = currentUserService.currentUser();
+    if (currentUser.getRole() == UserRole.CLIENT) {
+      return testDriveRequestRepository
+          .findAllByRemovedFalseAndClient_Id(currentUser.getId())
+          .stream()
+          .map(this::toResponse)
+          .toList();
+    }
     return testDriveRequestRepository.findAllByRemovedFalse().stream()
         .map(this::toResponse)
         .toList();
   }
 
   public TestDriveResponse create(TestDriveRequestDto request) {
-    if (request == null
-        || request.clientId() == null
-        || request.carId() == null
-        || request.startDateTime() == null) {
+    if (request == null || request.carId() == null || request.startDateTime() == null) {
       throw new DomainValidationException("Invalid test drive request.");
     }
     if (request.startDateTime().isBefore(Instant.now())) {
       throw new DomainValidationException("Test drive date must be in the future.");
     }
-    UserEntity client =
-        userRepository
-            .findByIdAndRemovedFalse(request.clientId())
-            .orElseThrow(EntityLookupSupport.notFound("User", request.clientId()));
-    if (client.getRole() != UserRole.CLIENT) {
+    UserEntity client = resolveClient(request.clientId());
+    if (client.getRole() != UserRole.CLIENT
+        && client.getRole() != UserRole.ADMIN
+        && client.getRole() != UserRole.SYSTEM_ADMIN) {
       throw new DomainValidationException("Only client can request a test drive.");
     }
     CarInStockEntity car =
@@ -86,6 +98,23 @@ public class TestDriveService {
             .orElseThrow(EntityLookupSupport.notFound("Car in stock", carId));
     entity.setAvailableForTestDrive(false);
     carInStockRepository.save(entity);
+  }
+
+  private UserEntity resolveClient(UUID requestedClientId) {
+    if (currentUserService.hasAuthentication()) {
+      UserEntity currentUser = currentUserService.currentUser();
+      if (currentUser.getRole() == UserRole.CLIENT
+          || currentUser.getRole() == UserRole.ADMIN
+          || currentUser.getRole() == UserRole.SYSTEM_ADMIN) {
+        return currentUser;
+      }
+    }
+    if (requestedClientId != null) {
+      return userRepository
+          .findByIdAndRemovedFalse(requestedClientId)
+          .orElseThrow(EntityLookupSupport.notFound("User", requestedClientId));
+    }
+    return currentUserService.currentUser();
   }
 
   private TestDriveResponse toResponse(TestDriveRequestEntity entity) {
